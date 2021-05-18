@@ -8,6 +8,8 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import it.polito.tdp.rivers.model.Model;
+import it.polito.tdp.rivers.model.River;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -25,7 +27,7 @@ public class FXMLController {
     private URL location;
 
     @FXML // fx:id="boxRiver"
-    private ComboBox<?> boxRiver; // Value injected by FXMLLoader
+    private ComboBox<River> boxRiver; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtStartDate"
     private TextField txtStartDate; // Value injected by FXMLLoader
@@ -48,6 +50,37 @@ public class FXMLController {
     @FXML // fx:id="txtResult"
     private TextArea txtResult; // Value injected by FXMLLoader
 
+    @FXML
+    void doSimula(ActionEvent event) {
+    	River r = boxRiver.getValue();
+    	double k ;
+    	try {
+    		k= Double.valueOf(txtK.getText());
+    		model.setK(k);
+    		
+    		model.analizzaEvento(r);
+    		double c = model.getC_med();
+    		int giorni = model.getGiorni();
+    		txtResult.setText("I giorni : "+giorni+"\n La capacita media: "+c);
+    		
+    	}
+    	catch (NumberFormatException e) {
+    		txtResult.setText("Metti un numero pirla");
+    	}
+    }
+
+    @FXML
+    void scegliFiume(ActionEvent event) {
+
+    	River r = boxRiver.getValue();
+    	this.txtStartDate.setText(model.getDataMinima(r).toString());
+    	this.txtEndDate.setText(model.getDataMassima(r).toString());
+    	double flusso = model.getFlussoMedio(r);
+    	this.txtFMed.setText(String.valueOf(flusso));
+    	this.txtNumMeasurements.setText(String.valueOf(model.getFlowByRiver(r).size()));
+
+    }
+
     @FXML // This method is called by the FXMLLoader when initialization is complete
     void initialize() {
         assert boxRiver != null : "fx:id=\"boxRiver\" was not injected: check your FXML file 'Scene.fxml'.";
@@ -58,9 +91,11 @@ public class FXMLController {
         assert txtK != null : "fx:id=\"txtK\" was not injected: check your FXML file 'Scene.fxml'.";
         assert btnSimula != null : "fx:id=\"btnSimula\" was not injected: check your FXML file 'Scene.fxml'.";
         assert txtResult != null : "fx:id=\"txtResult\" was not injected: check your FXML file 'Scene.fxml'.";
+
     }
-    
     public void setModel(Model model) {
     	this.model = model;
+    	boxRiver.getItems().add(null);
+    	boxRiver.getItems().addAll(model.getRivers());
     }
 }
